@@ -4,7 +4,7 @@ Pakai OpenCV buat baca kamera, MediaPipe buat deteksi tangannya, sama pyttsx3 bu
 
 ## Yang dibutuhkan
 
-- Python **3.11** — ini penting, jangan pakai versi lain. Aku sempat kejebak pakai Python 3.14 dan mediapipe-nya error terus (`module 'mediapipe' has no attribute 'solutions'`), ternyata versi mediapipe yang stabil belum support Python sebaru itu.
+- Python **3.11** (paling aman). Aku sempat kejebak pakai Python 3.14 dan mediapipe-nya error terus (`module 'mediapipe' has no attribute 'solutions'`), ternyata mediapipe versi lama yang stabil belum support Python sebaru itu.
 - Webcam
 - Mic (buat voice command)
 - Koneksi internet pas mau pakai voice command, soalnya speech recognition-nya lewat Google
@@ -16,10 +16,10 @@ mediapipe==0.10.9
 pyttsx3
 SpeechRecognition
 pyaudio
-pypiwin32
+pywin32
 ```
 
-Kenapa mediapipe-nya harus versi 0.10.9? Karena versi terbaru udah ganti API, modul `solutions` yang dipakai di script ini dihapus di versi baru. Jadi kalau install mediapipe versi paling baru malah error.
+Kenapa mediapipe-nya disaranin versi 0.10.9? Versi mediapipe terbaru udah ganti API, modul `solutions` dihapus. Script ini sebenarnya udah bisa jalan di dua-duanya (otomatis pindah ke API baru kalau `solutions` gak ada), tapi yang paling sering aku tes ya pakai 0.10.9.
 
 ## Cara install
 
@@ -32,21 +32,17 @@ Kenapa mediapipe-nya harus versi 0.10.9? Karena versi terbaru udah ganti API, mo
 
 2. Clone repo ini terus masuk ke foldernya:
    ```
-   git clone https://github.com/USERNAME/NAMA-REPO.git
-   cd NAMA-REPO
+   git clone https://github.com/atepdo/fingerdetection.git
+   cd fingerdetection
    ```
 
 3. Install library-librarynya:
    ```
-   py -3.11 -m pip install opencv-python pyttsx3 SpeechRecognition pypiwin32
+   py -3.11 -m pip install opencv-python pyttsx3 SpeechRecognition pyaudio pywin32
    py -3.11 -m pip install mediapipe==0.10.9
    ```
 
-4. `pyaudio` biasanya agak rewel kalau di-install langsung. Kalau error, coba ini:
-   ```
-   py -3.11 -m pip install pipwin
-   py -3.11 -m pipwin install pyaudio
-   ```
+   `pyaudio` sekarang udah bisa langsung di-install lewat pip di Windows (Python 3.8 sampai 3.13), gak perlu cara aneh-aneh lagi.
 
 ## Cara jalanin
 
@@ -54,16 +50,37 @@ Kenapa mediapipe-nya harus versi 0.10.9? Karena versi terbaru udah ganti API, mo
 py -3.11 deteksi_jari.py
 ```
 
-Kamera bakal langsung nyala. Tinggal angkat tangan ke depan kamera, nanti keluar garis-garis di jari kamu dan angka jumlah jarinya bakal keluar di layar sambil diucapin. Kalau mau lebih dari 5, angkat dua tangan sekaligus (regangin jangan ketumpuk biar kedeteksi dua-duanya).
+Kamera bakal langsung nyala. Tinggal angkat tangan ke depan kamera, nanti keluar garis-garis di jari kamu dan angka jumlah jarinya bakal keluar di panel kiri atas sambil diucapin. Jari yang kebuka ditandain lingkaran hijau, dan tiap tangan ada labelnya (Kanan / Kiri). Kalau mau lebih dari 5, angkat dua tangan sekaligus (regangin jangan ketumpuk biar kedeteksi dua-duanya).
 
-Terus kalau mau coba fitur satunya, tinggal ngomong aja ke mic "halo jarvis", nanti dia jawab "halo sir".
+Tombol keyboard (klik jendela kameranya dulu):
 
-Buat keluar dari programnya, klik jendela kameranya terus pencet `q`.
+| Tombol | Fungsi |
+|---|---|
+| `Q` / `ESC` | keluar |
+| `M` | suara hidup / mati |
+| `F` | layar penuh |
+
+Bisa juga keluar dengan klik tombol X di jendelanya.
+
+Voice command, tinggal ngomong ke mic:
+- **"halo jarvis"** → dia jawab "halo sir"
+- **"berapa jari"** → dia nyebutin jumlah jari yang lagi kelihatan
+
+## Pengaturan
+
+Ada di bagian paling atas `deteksi_jari.py`:
+
+- `KAMERA_INDEX = 0` → ganti ke 1 atau 2 kalau kamera yang kebuka salah / gak kebuka
+- `MODEL_COMPLEXITY = 1` → ganti ke 0 kalau laptop berat (lebih ringan, sedikit kurang akurat)
+- `JEDA_UCAP = 0.9` → jeda minimal antar ucapan (detik)
 
 ## Kalau ada masalah
 
 **Error `module 'mediapipe' has no attribute 'solutions'`**
-Berarti versi mediapipe-nya kebaru. Uninstall dulu, install lagi yang versi 0.10.9.
+Berarti kamu masih pakai script versi lama dengan mediapipe versi baru. Pakai script terbaru, atau uninstall mediapipe terus install lagi yang versi 0.10.9.
+
+**Pertama kali jalan muncul tulisan "Mengunduh model tangan MediaPipe..."**
+Normal, ini cuma kejadian kalau mediapipe-nya versi baru. Dia download file `hand_landmarker.task` (~8 MB) sekali aja, jadi pastiin ada internet.
 
 **Ketik `python` di CMD tapi masih kepake python versi lama**
 Pakai `py -3.11` aja di depan, jangan cuma `python`.
@@ -78,15 +95,16 @@ Ini bug bawaan pyttsx3 di Windows, biasanya kalau engine-nya dipake berkali-kali
 Cek koneksi internet, soalnya proses ngenalin suaranya butuh internet (pakai Google).
 
 **Kamera gak kebuka**
-Di dalam script ada baris `cv2.VideoCapture(0)`, coba ganti angka 0-nya jadi 1 atau 2.
+Ganti `KAMERA_INDEX = 0` di bagian atas script jadi 1 atau 2.
 
 **Install pyaudio gagal**
-Pakai cara pipwin yang di atas.
+Pastiin pip-nya udah terbaru dulu (`py -3.11 -m pip install --upgrade pip`), terus coba install lagi. Kalau tetap gagal, program masih bisa jalan, cuma voice command-nya yang mati.
 
 ## Isi folder
 
-- `deteksi_jari.py` — script utamanya
-- `README.md` — ini yang lagi kamu baca
+- `deteksi_jari.py`: script utamanya
+- `README.md`: ini yang lagi kamu baca
+- `hand_landmarker.task`: file model, cuma muncul kalau pakai mediapipe versi baru (gak perlu di-upload ke GitHub)
 
 ---
 
