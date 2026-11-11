@@ -39,7 +39,7 @@ Kenapa mediapipe-nya disaranin versi 0.10.9? Versi mediapipe terbaru udah ganti 
 3. Install library-librarynya:
    ```
    py -3.11 -m pip install opencv-python pyttsx3 SpeechRecognition pyaudio pywin32
-   py -3.11 -m pip install mediapipe==0.10.9
+   py -3.11 -m pip install mediapipe==0.10.9 protobuf==3.20.3
    ```
 
    `pyaudio` sekarang udah bisa langsung di-install lewat pip di Windows (Python 3.8 sampai 3.13), gak perlu cara aneh-aneh lagi.
@@ -78,6 +78,12 @@ Ada di bagian paling atas `deteksi_jari.py`:
 
 **Error `module 'mediapipe' has no attribute 'solutions'`**
 Berarti kamu masih pakai script versi lama dengan mediapipe versi baru. Pakai script terbaru, atau uninstall mediapipe terus install lagi yang versi 0.10.9.
+
+**Error `'MessageFactory' object has no attribute 'GetPrototype'` atau `FieldDescriptor ... has no attribute 'label'`**
+Versi `protobuf`-nya kebaru buat mediapipe 0.10.9 (biasanya ke-upgrade sama library lain). Turunin versinya:
+```
+py -3.11 -m pip install protobuf==3.20.3
+```
 
 **Pertama kali jalan muncul tulisan "Mengunduh model tangan MediaPipe..."**
 Normal, ini cuma kejadian kalau mediapipe-nya versi baru. Dia download file `hand_landmarker.task` (~8 MB) sekali aja, jadi pastiin ada internet.
